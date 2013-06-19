@@ -118,12 +118,10 @@ require 'yaml'
 
 info = {
   # "description" => RUBY_DESCRIPTION,
-#   # "brew" => `brew doctor`.strip,
-#   "build-ruby" => {
-#     "local" => "--",
-#     "origin" => "--"
-#     },
   "rubies" => ruby_versions_info,
+  "ruby-build" => `ruby-build --version`.strip,
+  "rbenv" => `rbenv --version`.strip,
+  "brew" => `brew --version`.strip,
 }
 
 puts info.to_yaml
