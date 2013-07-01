@@ -34,6 +34,7 @@ info = {
   "ruby-build" => `ruby-build --version`.strip,
   "rbenv" => `rbenv --version`.strip,
   "brew" => `brew --version`.strip,
+  "brew outdated" => `brew outdated`.lines.map(&:strip)
 }
 
 info["rubies"].each do |k, v|
