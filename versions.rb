@@ -7,7 +7,11 @@ Status = {
   tick: 0x2705.chr('UTF-8')
 }
 
-installed_rubies = `rbenv versions --bare`.lines.collect(&:strip)
+
+installed_rubies_and_aliases = `rbenv versions --bare`.lines.collect(&:strip)
+installed_ruby_aliases = `rbenv alias --list 2> /dev/null`.lines.collect(&:strip).collect{|r_alias| r_alias.split(' => ')[0]}
+installed_rubies = installed_rubies_and_aliases - installed_ruby_aliases
+
 installed_ruby_versions = installed_rubies.map {|v| RubyVersion.parse v }.group_by(&:implementation_version)
 
 available_rubies = `rbenv install -l`.lines.map(&:strip)[1..-1]
