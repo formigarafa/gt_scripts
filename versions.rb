@@ -33,12 +33,11 @@ require 'yaml'
 
 info = {
   # "description" => RUBY_DESCRIPTION,
-  "testar" => ["brew outdated"],
+  "brew_outdated" => `brew outdated`.lines.map(&:strip),
+  "brew_version" => `brew --version`.strip,
   "rubies" => ruby_versions_info,
   "ruby-build" => `ruby-build --version`.strip,
   "rbenv" => `rbenv --version`.strip,
-  "brew" => `brew --version`.strip,
-  "brew outdated" => `brew outdated`.lines.map(&:strip)
 }
 
 info["rubies"].each do |k, v|
@@ -52,5 +51,19 @@ info["rubies"].each do |k, v|
 end
 
 info.delete "rubies"
+
+puts "---"
+
+# info["brew_outdated"] = `brew outdated`.lines.map(&:strip)
+if info["brew_outdated"].any?
+  puts "#{info["brew_version"]}: brew"
+  info["brew_outdated"].each do |formula|
+    puts "#{Status[:alert]} #{formula} is outdated"
+  end
+else
+  puts "#{Status[:tick]} #{info["brew_version"]}: brew is up to date"
+end
+info.delete "brew_outdated"
+info.delete "brew_version"
 
 puts info.to_yaml
