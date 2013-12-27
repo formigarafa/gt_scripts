@@ -1,7 +1,7 @@
 class RubyVersion
   include Comparable
 
-  attr_accessor :implementation, :version, :dev, :preview, :rc, :patch_level, :timestamp
+  attr_accessor :implementation, :version, :dev, :preview, :rc, :patch_level, :timestamp, :semantic
   # attr_accessor :match_data, :src_string
 
 
@@ -13,6 +13,9 @@ class RubyVersion
     self.rc = version_info[:rc]
     self.patch_level = version_info[:patch_level]
     self.timestamp = version_info[:timestamp]
+
+    # http://www.ruby-lang.org/en/news/2013/12/21/semantic-versioning-after-2-1-0/
+    self.semantic = implementation.nil? && (version[0] > 2 || (version[0] == 2 && version[1] >= 1))
   end
 
   def self.parse(version_string)
@@ -62,6 +65,10 @@ class RubyVersion
   end
 
   def implementation_version
+    if semantic
+      return version[0].to_s
+    end
+
     joint_version = version.any? && version.join(".") || nil
     [implementation, joint_version].compact.join "-"
   end
@@ -70,12 +77,22 @@ class RubyVersion
     [timestamp, patch_level, rc, preview, dev].compact.first
   end
 
+  def final_release?
+    [dev, preview, rc].none?
+  end
+
   # def inspect
   #   {implementation: implementation_version, timestamp: timestamp, patch_level: patch_level, rc: rc, preview: preview, dev: dev}
   # end
 
   def to_s
-    [implementation_version, release].compact.join("-")
+    if semantic
+      joint_version = version.any? && version.join(".") || nil
+      semantic_implementation_version = [implementation, joint_version].compact.join "-"
+      [semantic_implementation_version, release].compact.join("-")
+    else
+      [implementation_version, release].compact.join("-")
+    end
   end
 
 

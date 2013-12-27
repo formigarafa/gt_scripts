@@ -15,15 +15,17 @@ installed_rubies = installed_rubies_and_aliases - installed_ruby_aliases
 installed_ruby_versions = installed_rubies.map {|v| RubyVersion.parse v }.group_by(&:implementation_version)
 
 available_rubies = `rbenv install -l`.lines.map(&:strip)[1..-1]
-available_ruby_versions = available_rubies.map {|v| RubyVersion.parse v }.group_by(&:implementation_version)
+available_ruby_versions = available_rubies.map {|v| RubyVersion.parse v }
+available_final_ruby_release_versions = available_ruby_versions.select{|v| v.final_release? }
+grouped_availavble_ruby_versions = available_final_ruby_release_versions.group_by(&:implementation_version)
 
 ruby_versions_info = installed_ruby_versions.inject({}) do |latest, implementation_info|
   latest_installed = implementation_info[1].max
-  latest_available = available_ruby_versions[implementation_info[0]].max
+  latest_available = grouped_availavble_ruby_versions[implementation_info[0]].max
 
   latest[implementation_info[0]] = {
     installed: implementation_info[1].max, 
-    available: available_ruby_versions[implementation_info[0]].max,
+    available: grouped_availavble_ruby_versions[implementation_info[0]].max,
     status: latest_available > latest_installed ? :alert : :tick
   }
   latest
@@ -44,10 +46,18 @@ info["rubies"].each do |k, v|
   description = if v[:status] == :tick
     v[:installed].release
   else
-    "#{v[:installed].release} < #{v[:available].release}"
+    if v[:installed].semantic
+      "#{v[:installed]} < #{v[:available]}"
+    else
+      "#{v[:installed].release} < #{v[:available].release}"
+    end
   end
 
-  puts "#{Status[v[:status]]} #{v[:installed].implementation_version}: #{description}"
+  if v[:installed].semantic
+    puts "#{Status[v[:status]]} #{v[:installed]}: #{description}"
+  else
+    puts "#{Status[v[:status]]} #{v[:installed].implementation_version}: #{description}"
+  end
 end
 
 info.delete "rubies"
