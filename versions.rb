@@ -40,6 +40,7 @@ info = {
   "rubies" => ruby_versions_info,
   "ruby-build" => `ruby-build --version`.strip,
   "rbenv" => `rbenv --version`.strip,
+  "Updated at" => Time.now.asctime
 }
 
 info["rubies"].each do |k, v|
